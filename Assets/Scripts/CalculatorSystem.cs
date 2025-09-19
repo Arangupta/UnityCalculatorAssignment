@@ -11,7 +11,13 @@ public class CalculatorSystem : MonoBehaviour
 
     private string expression = "0";          
     private string displayExpression = "0";   
-    private bool justEvaluated = false;       
+    private bool justEvaluated = false;
+
+    private void Start()
+    {
+        expressionDisplay.text = displayExpression;
+        resultDisplay.text = "";
+    }   
 
     private void Update()
     {
