@@ -9,36 +9,40 @@ public class CalculatorSystem : MonoBehaviour
     [SerializeField] private TMP_Text expressionDisplay;
     [SerializeField] private TMP_Text resultDisplay;
 
-    private string expression = "0";          
-    private string displayExpression = "0";   
+    private string expression = "0";          // Internal calculation string
+    private string displayExpression = "0";   // Display-friendly string
     private bool justEvaluated = false;
 
     private void Start()
     {
         expressionDisplay.text = displayExpression;
         resultDisplay.text = "";
-    }   
+    }
 
     private void Update()
     {
         HandleKeyboardInput();
     }
 
-    // -----------------------------
+    // ======================================================
     // Keyboard Input
-    // -----------------------------
+    // ======================================================
     private void HandleKeyboardInput()
     {
-        // Digits 0-9
+        // Digits (0–9)
         for (KeyCode key = KeyCode.Alpha0; key <= KeyCode.Alpha9; key++)
+        {
             if (Input.GetKeyDown(key))
                 AddInput(((int)key - (int)KeyCode.Alpha0).ToString());
+        }
 
         for (KeyCode key = KeyCode.Keypad0; key <= KeyCode.Keypad9; key++)
+        {
             if (Input.GetKeyDown(key))
                 AddInput(((int)key - (int)KeyCode.Keypad0).ToString());
+        }
 
-        // Decimal
+        // Decimal point
         if (Input.GetKeyDown(KeyCode.Period) || Input.GetKeyDown(KeyCode.KeypadPeriod))
             AddInput(".");
 
@@ -55,12 +59,12 @@ public class CalculatorSystem : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Slash) || Input.GetKeyDown(KeyCode.KeypadDivide))
             AddInput("/");
 
-        // Equals or Enter (WebGL-safe)
-        if (Input.GetKeyDown(KeyCode.Equals) || 
-            Input.GetKeyDown(KeyCode.Return) || 
-            Input.GetKeyDown(KeyCode.KeypadEnter) || 
-            Input.GetKeyDown(KeyCode.KeypadEquals) || 
-            Input.inputString == "\n" || 
+        // Equals or Enter (WebGL safe)
+        if (Input.GetKeyDown(KeyCode.Equals) ||
+            Input.GetKeyDown(KeyCode.Return) ||
+            Input.GetKeyDown(KeyCode.KeypadEnter) ||
+            Input.GetKeyDown(KeyCode.KeypadEquals) ||
+            Input.inputString == "\n" ||
             Input.inputString == "=")
         {
             Evaluate();
@@ -75,45 +79,45 @@ public class CalculatorSystem : MonoBehaviour
             ResetCalculator();
     }
 
-    // -----------------------------
+    // ======================================================
     // Input Handling
-    // -----------------------------
+    // ======================================================
     public void AddInput(string input)
     {
-        // If last action was "=", decide what to do
+        // If last action was "=", decide next step
         if (justEvaluated)
         {
             if (char.IsDigit(input[0]))
             {
-                // Start new calculation if number pressed
+                // Start fresh if a number is pressed
                 expression = "";
                 displayExpression = "";
                 resultDisplay.text = "";
             }
-            // If operator pressed, continue from result
+
+            // Continue from result if operator pressed
             expressionDisplay.text = "";
             justEvaluated = false;
         }
 
-        // Replace starting 0 if digit pressed
+        // Replace starting "0" if digit pressed
         if (expression == "0" && char.IsDigit(input[0]))
         {
             expression = "";
             displayExpression = "";
         }
 
-        string displayValue = input;
         string evalValue = input;
+        string displayValue = input;
 
         if (input == "*") displayValue = "×";
         else if (input == "/") displayValue = "÷";
 
-        // ✅ Replace operator if last char is already an operator
+        // Replace operator if last char is already an operator
         if ("+-*/".Contains(evalValue))
         {
             if (expression.Length > 0 && "+-*/".Contains(expression[^1].ToString()))
             {
-                // Replace in both internal and display strings
                 expression = expression.Substring(0, expression.Length - 1) + evalValue;
                 displayExpression = displayExpression.Substring(0, displayExpression.Length - 1) + displayValue;
                 expressionDisplay.text = displayExpression;
@@ -158,16 +162,16 @@ public class CalculatorSystem : MonoBehaviour
         justEvaluated = false;
     }
 
-    // -----------------------------
+    // ======================================================
     // Evaluation
-    // -----------------------------
+    // ======================================================
     public void Evaluate()
     {
         try
         {
             if (string.IsNullOrEmpty(expression)) return;
 
-            // ❌ If expression ends with an operator → show error
+            // Expression ending with operator → error
             if ("+-*/".Contains(expression[^1].ToString()))
             {
                 resultDisplay.text = "Error";
@@ -182,7 +186,7 @@ public class CalculatorSystem : MonoBehaviour
                 ? ((int)result).ToString()
                 : result.ToString("0.######");
 
-            // Save result for chaining
+            // Save result for further chaining
             expression = result.ToString();
             displayExpression = result.ToString();
             justEvaluated = true;
@@ -194,9 +198,9 @@ public class CalculatorSystem : MonoBehaviour
         }
     }
 
-    // -----------------------------
+    // ======================================================
     // Tokenization
-    // -----------------------------
+    // ======================================================
     private List<string> Tokenize(string expr)
     {
         List<string> tokens = new List<string>();
@@ -215,7 +219,8 @@ public class CalculatorSystem : MonoBehaviour
                 if ((c == '-' || c == '+') &&
                     (i == 0 || "+-*/".Contains(expr[i - 1].ToString())))
                 {
-                    numberBuffer += c; // unary sign
+                    // Unary sign
+                    numberBuffer += c;
                 }
                 else
                 {
@@ -235,14 +240,14 @@ public class CalculatorSystem : MonoBehaviour
         return tokens;
     }
 
-    // -----------------------------
+    // ======================================================
     // Evaluation Logic (DMAS)
-    // -----------------------------
+    // ======================================================
     private double EvaluateExpression(string expr)
     {
         List<string> tokens = Tokenize(expr);
 
-        // Step 1: × and ÷
+        // Step 1: handle * and /
         for (int i = 0; i < tokens.Count; i++)
         {
             if (tokens[i] == "*" || tokens[i] == "/")
@@ -257,14 +262,11 @@ public class CalculatorSystem : MonoBehaviour
 
                 if (tokens[i] == "*")
                 {
-                    value = left * right; // normal multiply
+                    value = left * right;
                 }
                 else if (tokens[i] == "/")
                 {
-                    if (Math.Abs(right) < 0.000001)
-                        value = 0; // ✅ return 0 instead of error
-                    else
-                        value = left / right;
+                    value = Math.Abs(right) < 0.000001 ? 0 : left / right;
                 }
 
                 tokens[i - 1] = value.ToString();
@@ -274,7 +276,7 @@ public class CalculatorSystem : MonoBehaviour
             }
         }
 
-        // Step 2: + and -
+        // Step 2: handle + and -
         double result = double.Parse(tokens[0]);
         for (int i = 1; i < tokens.Count; i += 2)
         {
