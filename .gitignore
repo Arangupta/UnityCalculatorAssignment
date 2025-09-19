@@ -1,0 +1,51 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+UserSettings/
+
+# Visual Studio / Rider
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Unity Asset Store tools
+Assets/AssetStoreTools*
+
+# VS generated
+.vs/
+
+# Build artifacts
+[Bb]uildOutput/
+*.apk
+*.aab
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+
+# Other
+.DS_Store
+*.swp
+*.tmp
+*.temp
+*.unitypackage
